@@ -27,8 +27,6 @@ func finalizer(c *Connector) {
 
 // NewConn - 连接 适配器 工厂
 func NewConn(url string, timeout time.Duration) (*Connector, error) {
-	log.Println("url:", url)
-
 	// Parse and validate url before apply it.
 	connString, err := connstring.ParseAndValidate(url)
 

@@ -15,20 +15,20 @@ type userUsecase struct {
 }
 
 // NewUserUsecase will create new an userUsecase object representation of domain.ArticleUsecase interface
-func NewUserUsecase(a domain.UserRepository, timeout time.Duration) domain.UserUsecase {
+func NewUserUsecase(repo domain.UserRepository, timeout time.Duration) domain.UserUsecase {
 	return &userUsecase{
-		userRepo:       a,
+		userRepo:       repo,
 		contextTimeout: timeout,
 	}
 }
 
-func (u *userUsecase) RegisterUser(c context.Context, body domain.Register) error {
+func (u *userUsecase) RegisterUserUc(c context.Context, body domain.Register) error {
 	ctx, cancel := context.WithTimeout(c, u.contextTimeout)
 	defer cancel()
 	return u.userRepo.RegisterUser(ctx, body)
 }
 
-func (u *userUsecase) GetByID(c context.Context, id string) (res domain.User, err error) {
+func (u *userUsecase) GetByIDUc(c context.Context, id string) (res domain.User, err error) {
 	ctx, cancel := context.WithTimeout(c, u.contextTimeout)
 	defer cancel()
 
@@ -40,7 +40,7 @@ func (u *userUsecase) GetByID(c context.Context, id string) (res domain.User, er
 	return
 }
 
-func (u *userUsecase) GetByUsername(c context.Context, username string) (res domain.User, err error) {
+func (u *userUsecase) GetByUsernameUc(c context.Context, username string) (res domain.User, err error) {
 	ctx, cancel := context.WithTimeout(c, u.contextTimeout)
 	defer cancel()
 
@@ -52,7 +52,7 @@ func (u *userUsecase) GetByUsername(c context.Context, username string) (res dom
 	return
 }
 
-func (u *userUsecase) CheckUsernameAndPass(c context.Context, username string, password string) (domain.User, error) {
+func (u *userUsecase) CheckUsernameAndPassUc(c context.Context, username string, password string) (domain.User, error) {
 	ctx, cancel := context.WithTimeout(c, u.contextTimeout)
 	defer cancel()
 

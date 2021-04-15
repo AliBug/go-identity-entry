@@ -14,5 +14,9 @@
 # Mac os file
 .DS_Store
 
+# Test file
+cmd.txt
+config_local.yaml
+
 # Dependency directories (remove the comment below to include it)
 # vendor/

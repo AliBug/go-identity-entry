@@ -17,3 +17,15 @@ func (id StrToObjectID) MarshalBSONValue() (bsontype.Type, []byte, error) {
 	}
 	return bson.MarshalValue(p)
 }
+
+// CookieConfig -
+type CookieConfig interface {
+	GetAccessTokenMaxAge() int
+	GetRefreshTokenMaxAge() int
+	GetDomain() string
+	GetSecure() bool
+	GetHTTPOnly() bool
+}
+
+/*
+ */

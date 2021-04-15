@@ -23,10 +23,10 @@ type User interface {
 
 // UserUsecase ...
 type UserUsecase interface {
-	RegisterUser(ctx context.Context, body Register) error
-	GetByID(ctx context.Context, id string) (User, error)
-	GetByUsername(ctx context.Context, username string) (User, error)
-	CheckUsernameAndPass(ctx context.Context, username string, password string) (User, error)
+	RegisterUserUc(ctx context.Context, body Register) error
+	GetByIDUc(ctx context.Context, id string) (User, error)
+	GetByUsernameUc(ctx context.Context, username string) (User, error)
+	CheckUsernameAndPassUc(ctx context.Context, username string, password string) (User, error)
 }
 
 // UserRepository represent the user's repository contract
