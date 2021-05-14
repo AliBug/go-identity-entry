@@ -113,8 +113,8 @@ func (t *TokenConfig) GetRefreshExpirationSeconds() time.Duration {
 func ReadTokenConfig() *TokenConfig {
 	accessTokenSecret := []byte(viper.GetString("token.accessSecret"))
 	refreshTokenSecret := []byte(viper.GetString("token.refreshSecret"))
-	accessExpirationSeconds := time.Duration(viper.GetInt("token.expiresSeconds"))
-	refreshExpirationSeconds := time.Duration(viper.GetInt("token.refreshSeconds"))
+	accessExpirationSeconds := time.Duration(viper.GetInt("maxage.accessToken"))
+	refreshExpirationSeconds := time.Duration(viper.GetInt("maxage.refreshToken"))
 	issuer := viper.GetString("token.issuer")
 	return &TokenConfig{
 		accessTokenSecret:        accessTokenSecret,
@@ -171,8 +171,8 @@ secure             bool
 func ReadCookieConfig() *CookieConfig {
 	secure := viper.GetBool("cookie.secure")
 	httpOnly := viper.GetBool("cookie.httpOnly")
-	accessTokenMaxAge := viper.GetInt("cookie.accessTokenMaxAge")
-	refreshTokenMaxAge := viper.GetInt("cookie.refreshTokenMaxAge")
+	accessTokenMaxAge := viper.GetInt("maxage.accessToken")
+	refreshTokenMaxAge := viper.GetInt("maxage.refreshToken")
 	domain := viper.GetString("cookie.domain")
 	return &CookieConfig{
 		secure:             secure,

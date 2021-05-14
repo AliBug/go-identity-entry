@@ -40,11 +40,11 @@ func (u *userUsecase) GetByIDUc(c context.Context, id string) (res domain.User, 
 	return
 }
 
-func (u *userUsecase) GetByUsernameUc(c context.Context, username string) (res domain.User, err error) {
+func (u *userUsecase) GetByAccountUc(c context.Context, username string) (res domain.User, err error) {
 	ctx, cancel := context.WithTimeout(c, u.contextTimeout)
 	defer cancel()
 
-	res, err = u.userRepo.GetByUsername(ctx, username)
+	res, err = u.userRepo.GetByAccount(ctx, username)
 	if err != nil {
 		return
 	}
@@ -52,11 +52,11 @@ func (u *userUsecase) GetByUsernameUc(c context.Context, username string) (res d
 	return
 }
 
-func (u *userUsecase) CheckUsernameAndPassUc(c context.Context, username string, password string) (domain.User, error) {
+func (u *userUsecase) CheckAccountAndPassUc(c context.Context, username string, password string) (domain.User, error) {
 	ctx, cancel := context.WithTimeout(c, u.contextTimeout)
 	defer cancel()
 
-	res, err := u.userRepo.GetByUsername(ctx, username)
+	res, err := u.userRepo.GetByAccount(ctx, username)
 	if err != nil {
 		return nil, fmt.Errorf("%w: username or password invalid", domain.ErrBadParamInput)
 	}

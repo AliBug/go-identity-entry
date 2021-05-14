@@ -14,9 +14,8 @@
 # Mac os file
 .DS_Store
 
-# Test file
-cmd.txt
-config_local.yaml
+# Test files
+mock/
 
 # Dependency directories (remove the comment below to include it)
 # vendor/

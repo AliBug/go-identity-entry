@@ -8,16 +8,16 @@ import (
 
 // RegisterBody ... 注册信息
 type RegisterBody struct {
-	Username    string     `json:"username" bson:"username" binding:"required"`
+	Account     string     `json:"account" bson:"account" binding:"required"`
 	Password    string     `json:"password"  bson:"-" binding:"required,gte=6"`
 	Displayname string     `json:"displayname"  bson:"displayname" binding:"required"`
 	CryptPass   []byte     `json:"-" bson:"cryptpass,omitempty"`
 	CreatedAt   *time.Time `json:"created_at,omitempty" bson:"created_at,omitempty"`
 }
 
-// GetUsername - implement domain.RegisterBody
-func (r *RegisterBody) GetUsername() string {
-	return r.Username
+// GetAccount - implement domain.RegisterBody
+func (r *RegisterBody) GetAccount() string {
+	return r.Account
 }
 
 // GetPassword - implement domain.RegisterBody

@@ -23,7 +23,7 @@ func NewMongoUserRepository(coll *mongo.Collection) domain.UserRepository {
 func (m *mongoUserRepository) RegisterUser(ctx context.Context, register domain.Register) error {
 	// 1、 GetByUsername, if user existed, throw err
 	// 	  如果已有同名用户，抛出错误
-	_, err := m.GetByUsername(ctx, register.GetUsername())
+	_, err := m.GetByAccount(ctx, register.GetAccount())
 	if err == nil {
 		return domain.ErrConflict
 	}
@@ -56,8 +56,8 @@ func (m *mongoUserRepository) GetByID(ctx context.Context, id string) (domain.Us
 	return &u, err
 }
 
-func (m *mongoUserRepository) GetByUsername(ctx context.Context, username string) (domain.User, error) {
+func (m *mongoUserRepository) GetByAccount(ctx context.Context, account string) (domain.User, error) {
 	var u body.UserBody
-	err := m.userColl.FindOne(ctx, bson.M{"username": username}).Decode(&u)
+	err := m.userColl.FindOne(ctx, bson.M{"account": account}).Decode(&u)
 	return &u, err
 }

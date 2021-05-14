@@ -66,7 +66,7 @@ func (u *UserHandler) Login(c *gin.Context) {
 
 	// 3、校验用户名密码
 	ctx := c.Request.Context()
-	user, err := u.UserUsecase.CheckUsernameAndPassUc(ctx, body.Username, body.Password)
+	user, err := u.UserUsecase.CheckAccountAndPassUc(ctx, body.Account, body.Password)
 	if err != nil {
 		c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 		return

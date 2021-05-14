@@ -2,6 +2,6 @@ package body
 
 // LoginBody - User login structure
 type LoginBody struct {
-	Username string `json:"username"`
+	Account  string `json:"account"`
 	Password string `json:"password"`
 }

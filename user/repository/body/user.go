@@ -10,7 +10,7 @@ import (
 type UserBody struct {
 	ID domain.StrToObjectID `bson:"_id,omitempty" json:"id,omitempty"` // 用户ID
 	// RegisterBody
-	Username    string     `json:"username" bson:"username" binding:"required"`
+	Account     string     `json:"account" bson:"account" binding:"required"`
 	Displayname string     `json:"displayname"  bson:"displayname" binding:"required"`
 	CryptPass   []byte     `json:"-" bson:"cryptpass,omitempty"`
 	CreatedAt   *time.Time `json:"created_at,omitempty" bson:"created_at,omitempty"`
@@ -22,10 +22,12 @@ func (u *UserBody) GetUserID() string {
 	return string(u.ID)
 }
 
+// GetDisplayName - implement domain.User
 func (u *UserBody) GetDisplayName() string {
-	return string(u.Displayname)
+	return u.Displayname
 }
 
+// GetCryptPass - implement domain.User
 func (u *UserBody) GetCryptPass() []byte {
 	return u.CryptPass
 }
