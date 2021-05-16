@@ -1,2 +1,2 @@
-# go-casbin
-Backend service for user and role manage
+# go-identity-entry
+Register and Login entry for go-identity micro system.

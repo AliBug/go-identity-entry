@@ -1,4 +1,4 @@
-module github.com/alibug/go-identity
+module github.com/alibug/go-identity-entry
 
 go 1.16
 
