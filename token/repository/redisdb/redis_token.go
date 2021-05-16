@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/alibug/go-identity-utils/config"
 	"github.com/alibug/go-identity-utils/status"
 	"github.com/alibug/go-identity/domain"
 	"github.com/alibug/go-identity/token/repository/body"
@@ -15,11 +16,11 @@ import (
 
 type redisTokenRepository struct {
 	client      *redis.Client
-	tokenConfig domain.TokenConfig
+	tokenConfig config.TokenConfig
 }
 
 // NewRedisTokenRepository will create an object that represent the user.Repository interface
-func NewRedisTokenRepository(client *redis.Client, config domain.TokenConfig) domain.TokenRepository {
+func NewRedisTokenRepository(client *redis.Client, config config.TokenConfig) domain.TokenRepository {
 	return &redisTokenRepository{client, config}
 }
 

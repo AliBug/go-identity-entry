@@ -23,13 +23,13 @@ func NewUserUsecase(repo domain.UserRepository, timeout time.Duration) domain.Us
 	}
 }
 
-func (u *userUsecase) RegisterUserUc(c context.Context, body domain.Register) error {
+func (u *userUsecase) RegisterUserUC(c context.Context, body domain.Register) error {
 	ctx, cancel := context.WithTimeout(c, u.contextTimeout)
 	defer cancel()
 	return u.userRepo.RegisterUser(ctx, body)
 }
 
-func (u *userUsecase) GetByIDUc(c context.Context, id string) (res domain.User, err error) {
+func (u *userUsecase) GetByIDUC(c context.Context, id string) (res domain.User, err error) {
 	ctx, cancel := context.WithTimeout(c, u.contextTimeout)
 	defer cancel()
 
@@ -41,7 +41,7 @@ func (u *userUsecase) GetByIDUc(c context.Context, id string) (res domain.User, 
 	return
 }
 
-func (u *userUsecase) GetByAccountUc(c context.Context, username string) (res domain.User, err error) {
+func (u *userUsecase) GetByAccountUC(c context.Context, username string) (res domain.User, err error) {
 	ctx, cancel := context.WithTimeout(c, u.contextTimeout)
 	defer cancel()
 
@@ -53,7 +53,7 @@ func (u *userUsecase) GetByAccountUc(c context.Context, username string) (res do
 	return
 }
 
-func (u *userUsecase) CheckAccountAndPassUc(c context.Context, username string, password string) (domain.User, error) {
+func (u *userUsecase) CheckAccountAndPassUC(c context.Context, username string, password string) (domain.User, error) {
 	ctx, cancel := context.WithTimeout(c, u.contextTimeout)
 	defer cancel()
 

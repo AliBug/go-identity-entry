@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/alibug/go-identity-utils/config"
 	"github.com/alibug/go-identity-utils/status"
 	"github.com/alibug/go-identity/domain"
 	tokenBody "github.com/alibug/go-identity/token/repository/body"
@@ -15,11 +16,12 @@ import (
 type UserHandler struct {
 	UserUsecase  domain.UserUsecase
 	TokenUsecase domain.TokenUsecase
-	cookieConfig domain.CookieConfig
+	// cookieConfig domain.CookieConfig
+	cookieConfig config.CookieConfig
 }
 
 // NewUserHandler represent the httphandler for user
-func NewUserHandler(route *gin.Engine, uc domain.UserUsecase, tc domain.TokenUsecase, cookie domain.CookieConfig) {
+func NewUserHandler(route *gin.Engine, uc domain.UserUsecase, tc domain.TokenUsecase, cookie config.CookieConfig) {
 	handler := &UserHandler{
 		UserUsecase:  uc,
 		TokenUsecase: tc,
@@ -44,7 +46,7 @@ func (u *UserHandler) Logout(c *gin.Context) {
 	}
 
 	// 2、Delete token
-	err := u.TokenUsecase.DeleteTokenUc(c, token)
+	err := u.TokenUsecase.DeleteTokenUC(c, token)
 	if err != nil {
 		c.JSON(status.GetStatusCode(err), status.ResponseError{Message: err.Error()})
 		return
@@ -67,14 +69,14 @@ func (u *UserHandler) Login(c *gin.Context) {
 
 	// 3、校验用户名密码
 	ctx := c.Request.Context()
-	user, err := u.UserUsecase.CheckAccountAndPassUc(ctx, body.Account, body.Password)
+	user, err := u.UserUsecase.CheckAccountAndPassUC(ctx, body.Account, body.Password)
 	if err != nil {
 		c.JSON(status.GetStatusCode(err), status.ResponseError{Message: err.Error()})
 		return
 	}
 
 	// 4、创建 Token
-	token, err := u.TokenUsecase.CreateTokenUc(ctx, user.GetUserID())
+	token, err := u.TokenUsecase.CreateTokenUC(ctx, user.GetUserID())
 	if err != nil {
 		c.JSON(status.GetStatusCode(err), status.ResponseError{Message: err.Error()})
 		return
@@ -94,7 +96,7 @@ func (u *UserHandler) GetByID(c *gin.Context) {
 
 	ctx := c.Request.Context()
 
-	user, err := u.UserUsecase.GetByIDUc(ctx, id)
+	user, err := u.UserUsecase.GetByIDUC(ctx, id)
 	if err != nil {
 		c.JSON(status.GetStatusCode(err), status.ResponseError{Message: err.Error()})
 		return
@@ -113,7 +115,7 @@ func (u *UserHandler) RegisterUser(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
-	err := u.UserUsecase.RegisterUserUc(ctx, &body)
+	err := u.UserUsecase.RegisterUserUC(ctx, &body)
 	if err != nil {
 		c.JSON(status.GetStatusCode(err), status.ResponseError{Message: err.Error()})
 		return

@@ -20,7 +20,7 @@ func NewTokenUsecase(repo domain.TokenRepository, timeout time.Duration) domain.
 	}
 }
 
-func (t *tokenUsecase) CreateTokenUc(c context.Context, userID string) (res domain.Token, err error) {
+func (t *tokenUsecase) CreateTokenUC(c context.Context, userID string) (res domain.Token, err error) {
 	ctx, cancel := context.WithTimeout(c, t.contextTimeout)
 	defer cancel()
 
@@ -32,7 +32,7 @@ func (t *tokenUsecase) CreateTokenUc(c context.Context, userID string) (res doma
 	return
 }
 
-func (t *tokenUsecase) DeleteTokenUc(c context.Context, token domain.Token) (err error) {
+func (t *tokenUsecase) DeleteTokenUC(c context.Context, token domain.Token) (err error) {
 	ctx, cancel := context.WithTimeout(c, t.contextTimeout)
 	defer cancel()
 
@@ -44,7 +44,7 @@ func (t *tokenUsecase) DeleteTokenUc(c context.Context, token domain.Token) (err
 	return
 }
 
-func (t *tokenUsecase) RefreshTokenUc(c context.Context, token domain.Token) (res domain.Token, err error) {
+func (t *tokenUsecase) RefreshTokenUC(c context.Context, token domain.Token) (res domain.Token, err error) {
 	ctx, cancel := context.WithTimeout(c, t.contextTimeout)
 	defer cancel()
 

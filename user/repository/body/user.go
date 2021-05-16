@@ -3,12 +3,12 @@ package body
 import (
 	"time"
 
-	"github.com/alibug/go-identity/domain"
+	"github.com/alibug/go-identity-utils/converter"
 )
 
 // UserBody - Contain Register Body
 type UserBody struct {
-	ID domain.StrToObjectID `bson:"_id,omitempty" json:"id,omitempty"` // 用户ID
+	ID converter.StrToObjectID `bson:"_id,omitempty" json:"id,omitempty"` // 用户ID
 	// RegisterBody
 	Account     string     `json:"account" bson:"account" binding:"required"`
 	Displayname string     `json:"displayname"  bson:"displayname" binding:"required"`
