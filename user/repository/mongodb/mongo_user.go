@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/alibug/go-identity-utils/status"
 	"github.com/alibug/go-identity/domain"
 	"github.com/alibug/go-identity/user/repository/body"
 	"go.mongodb.org/mongo-driver/bson"
@@ -25,7 +26,7 @@ func (m *mongoUserRepository) RegisterUser(ctx context.Context, register domain.
 	// 	  如果已有同名用户，抛出错误
 	_, err := m.GetByAccount(ctx, register.GetAccount())
 	if err == nil {
-		return domain.ErrConflict
+		return status.ErrConflict
 	}
 
 	// 2、SetCreatedTime
@@ -48,7 +49,7 @@ func (m *mongoUserRepository) RegisterUser(ctx context.Context, register domain.
 func (m *mongoUserRepository) GetByID(ctx context.Context, id string) (domain.User, error) {
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return nil, domain.ErrBadParamInput
+		return nil, status.ErrBadParamInput
 	}
 
 	var u body.UserBody

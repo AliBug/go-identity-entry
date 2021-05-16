@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/alibug/go-identity-utils/status"
 	"github.com/alibug/go-identity/domain"
 	tokenBody "github.com/alibug/go-identity/token/repository/body"
 	userBody "github.com/alibug/go-identity/user/repository/body"
@@ -38,14 +39,14 @@ func (u *UserHandler) Logout(c *gin.Context) {
 	// 1、从 cookie 中 获取 token
 	token := getTokenFromCookie(c)
 	if token == nil {
-		c.JSON(getStatusCode(domain.ErrUnauthorized), ResponseError{Message: "You are not logged in"})
+		c.JSON(status.GetStatusCode(status.ErrUnauthorized), status.ResponseError{Message: "You are not logged in"})
 		return
 	}
 
 	// 2、Delete token
 	err := u.TokenUsecase.DeleteTokenUc(c, token)
 	if err != nil {
-		c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+		c.JSON(status.GetStatusCode(err), status.ResponseError{Message: err.Error()})
 		return
 	}
 
@@ -60,7 +61,7 @@ func (u *UserHandler) Login(c *gin.Context) {
 	var body userBody.LoginBody
 	// 1、 校验 body 格式
 	if err := c.ShouldBind(&body); err != nil {
-		c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+		c.JSON(status.GetStatusCode(err), status.ResponseError{Message: err.Error()})
 		return
 	}
 
@@ -68,14 +69,14 @@ func (u *UserHandler) Login(c *gin.Context) {
 	ctx := c.Request.Context()
 	user, err := u.UserUsecase.CheckAccountAndPassUc(ctx, body.Account, body.Password)
 	if err != nil {
-		c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+		c.JSON(status.GetStatusCode(err), status.ResponseError{Message: err.Error()})
 		return
 	}
 
 	// 4、创建 Token
 	token, err := u.TokenUsecase.CreateTokenUc(ctx, user.GetUserID())
 	if err != nil {
-		c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+		c.JSON(status.GetStatusCode(err), status.ResponseError{Message: err.Error()})
 		return
 	}
 
@@ -95,7 +96,7 @@ func (u *UserHandler) GetByID(c *gin.Context) {
 
 	user, err := u.UserUsecase.GetByIDUc(ctx, id)
 	if err != nil {
-		c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+		c.JSON(status.GetStatusCode(err), status.ResponseError{Message: err.Error()})
 		return
 	}
 
@@ -107,46 +108,17 @@ func (u *UserHandler) RegisterUser(c *gin.Context) {
 	var body userBody.RegisterBody
 	// 1、 校验 body 格式
 	if err := c.ShouldBind(&body); err != nil {
-		c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+		c.JSON(status.GetStatusCode(err), status.ResponseError{Message: err.Error()})
 		return
 	}
 
 	ctx := c.Request.Context()
 	err := u.UserUsecase.RegisterUserUc(ctx, &body)
 	if err != nil {
-		c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+		c.JSON(status.GetStatusCode(err), status.ResponseError{Message: err.Error()})
 		return
 	}
 	c.JSON(http.StatusCreated, gin.H{"ok": true})
-}
-
-// ResponseError represent the reseponse error struct
-type ResponseError struct {
-	Message string `json:"message"`
-}
-
-func getStatusCode(err error) int {
-	if err == nil {
-		return http.StatusOK
-	}
-
-	// logrus.Error(err)
-	switch err {
-	case domain.ErrInternalServerError:
-		return http.StatusInternalServerError
-	case domain.ErrNotFound:
-		return http.StatusNotFound
-	case domain.ErrConflict:
-		return http.StatusConflict
-	case domain.ErrBadParamInput:
-		return http.StatusBadRequest
-	case domain.ErrUnauthorized:
-		return http.StatusUnauthorized
-	case domain.ErrForbidden:
-		return http.StatusForbidden
-	default:
-		return http.StatusInternalServerError
-	}
 }
 
 func (u *UserHandler) setTokenToCookie(c *gin.Context, token domain.Token) {
@@ -156,6 +128,7 @@ func (u *UserHandler) setTokenToCookie(c *gin.Context, token domain.Token) {
 
 func (u *UserHandler) setUserInfoToCookie(c *gin.Context, user domain.User) {
 	c.SetCookie("displayname", user.GetDisplayName(), u.cookieConfig.GetRefreshTokenMaxAge(), "/", u.cookieConfig.GetDomain(), u.cookieConfig.GetSecure(), false)
+	c.SetCookie("userID", user.GetUserID(), u.cookieConfig.GetRefreshTokenMaxAge(), "/", u.cookieConfig.GetDomain(), u.cookieConfig.GetSecure(), u.cookieConfig.GetHTTPOnly())
 }
 
 func (u *UserHandler) clearUserInfoInCookie(c *gin.Context) {
@@ -187,7 +160,7 @@ func mustNotLoginInterceptor() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := getTokenFromCookie(c)
 		if token != nil {
-			c.JSON(getStatusCode(domain.ErrForbidden), ResponseError{Message: "You have logged in"})
+			c.JSON(status.GetStatusCode(status.ErrForbidden), status.ResponseError{Message: "You have logged in"})
 			c.Abort()
 		}
 		c.Next()

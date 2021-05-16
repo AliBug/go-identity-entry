@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/alibug/go-identity-utils/status"
 	"github.com/alibug/go-identity/domain"
 	"github.com/alibug/go-identity/token/repository/body"
 	"github.com/dgrijalva/jwt-go"
@@ -95,7 +96,7 @@ func (r *redisTokenRepository) DeleteToken(ctx context.Context, token domain.Tok
 		accessTokenDetail, err := r.CheckAccessToken(ctx, token.GetAccessToken())
 		if err != nil {
 			// ⚠️ 此处要考虑 GetAccessToken 为空的情况
-			return fmt.Errorf("%w:%v", domain.ErrUnauthorized, err)
+			return fmt.Errorf("%w:%v", status.ErrUnauthorized, err)
 		}
 
 		// 1.1 不管 token 是否存在 都直接删除 ⚠️ 是否存在 伪造 token 的 可能？
@@ -111,13 +112,13 @@ func (r *redisTokenRepository) DeleteToken(ctx context.Context, token domain.Tok
 		// refreshTokenDetail, err := parseToken(token.GetRefreshToken(), r.tokenConfig.GetRefreshTokenSecret())
 		refreshTokenDetail, err := r.checkRefreshToken(ctx, token.GetRefreshToken())
 		if err != nil {
-			return fmt.Errorf("%w:%v", domain.ErrUnauthorized, err)
+			return fmt.Errorf("%w:%v", status.ErrUnauthorized, err)
 		}
 		r.client.Del(ctx, refreshTokenDetail.GetTokenID())
 		return nil
 	}
 
-	return domain.ErrUnauthorized
+	return status.ErrUnauthorized
 }
 
 func (r *redisTokenRepository) RefreshToken(ctx context.Context, token domain.Token) (domain.Token, error) {
@@ -125,18 +126,18 @@ func (r *redisTokenRepository) RefreshToken(ctx context.Context, token domain.To
 		// 1、在 AccessToken 失效的情况下， 检查 refresh
 		refreshToken, err := r.checkRefreshToken(ctx, token.GetRefreshToken())
 		if err != nil {
-			return nil, fmt.Errorf("%w:%v", domain.ErrUnauthorized, err)
+			return nil, fmt.Errorf("%w:%v", status.ErrUnauthorized, err)
 		}
 		// 2、创建 新的 token
 		newToken, err := r.CreateToken(ctx, refreshToken.GetUserID())
 		if err != nil {
-			return nil, fmt.Errorf("%w:%v", domain.ErrInternalServerError, err)
+			return nil, fmt.Errorf("%w:%v", status.ErrInternalServerError, err)
 		}
 		// 3、删除原有的 refreshToken
 		r.client.Del(ctx, refreshToken.GetTokenID())
 		return newToken, nil
 	}
-	return nil, domain.ErrUnauthorized
+	return nil, status.ErrUnauthorized
 }
 
 func (r *redisTokenRepository) CheckAccessToken(ctx context.Context, tokenStr string) (domain.TokenDetail, error) {
@@ -154,10 +155,10 @@ func (r *redisTokenRepository) checkToken(ctx context.Context, tokenStr string, 
 	}
 	userID, err := r.client.Get(ctx, td.GetTokenID()).Result()
 	if err != nil {
-		return nil, fmt.Errorf("%w : token expired", domain.ErrInternalServerError)
+		return nil, fmt.Errorf("%w : token expired", status.ErrInternalServerError)
 	}
 	if td.GetUserID() != userID {
-		return nil, fmt.Errorf("%w : userID not match", domain.ErrInternalServerError)
+		return nil, fmt.Errorf("%w : userID not match", status.ErrInternalServerError)
 	}
 	return
 }
@@ -167,7 +168,7 @@ func parseToken(tokenStr string, secret []byte) (domain.TokenDetail, error) {
 		//Make sure that the token method conform to "SigningMethodHMAC" SigningMethodHS256
 		// if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("%w : invalid method", domain.ErrInternalServerError)
+			return nil, fmt.Errorf("%w : invalid method", status.ErrInternalServerError)
 		}
 		return secret, nil
 	})
@@ -175,18 +176,18 @@ func parseToken(tokenStr string, secret []byte) (domain.TokenDetail, error) {
 	if err != nil {
 		// ⚠️ 此处可能还有多处 细节值得考虑
 		// log.Println("parse err: ", err)
-		return nil, fmt.Errorf("%w : jwt parse error", domain.ErrInternalServerError)
+		return nil, fmt.Errorf("%w : jwt parse error", status.ErrInternalServerError)
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if ok && token.Valid {
 		tokenUUID, ok := claims["jti"].(string)
 		if !ok {
-			return nil, fmt.Errorf("%w : jti not found", domain.ErrInternalServerError)
+			return nil, fmt.Errorf("%w : jti not found", status.ErrInternalServerError)
 		}
 		userID, ok := claims["aud"].(string)
 		if err != nil {
-			return nil, fmt.Errorf("%w : aud not found", domain.ErrInternalServerError)
+			return nil, fmt.Errorf("%w : aud not found", status.ErrInternalServerError)
 		}
 		return body.NewTokenDetailBody(tokenUUID, userID), nil
 	}

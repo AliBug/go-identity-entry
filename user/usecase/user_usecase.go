@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/alibug/go-identity-utils/status"
 	"github.com/alibug/go-identity/domain"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -58,13 +59,13 @@ func (u *userUsecase) CheckAccountAndPassUc(c context.Context, username string, 
 
 	res, err := u.userRepo.GetByAccount(ctx, username)
 	if err != nil {
-		return nil, fmt.Errorf("%w: username or password invalid", domain.ErrBadParamInput)
+		return nil, fmt.Errorf("%w: username or password invalid", status.ErrBadParamInput)
 	}
 
 	// 2、用户存在 则比较密码
 	err = bcrypt.CompareHashAndPassword(res.GetCryptPass(), []byte(password))
 	if err != nil {
-		return nil, fmt.Errorf("%w: username or password invalid", domain.ErrBadParamInput)
+		return nil, fmt.Errorf("%w: username or password invalid", status.ErrBadParamInput)
 	}
 	return res, nil
 }
