@@ -4,11 +4,11 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/alibug/go-identity-entry/domain"
+	tokenBody "github.com/alibug/go-identity-entry/token/repository/body"
+	userBody "github.com/alibug/go-identity-entry/user/repository/body"
 	"github.com/alibug/go-identity-utils/config"
 	"github.com/alibug/go-identity-utils/status"
-	"github.com/alibug/go-identity/domain"
-	tokenBody "github.com/alibug/go-identity/token/repository/body"
-	userBody "github.com/alibug/go-identity/user/repository/body"
 	"github.com/gin-gonic/gin"
 )
 

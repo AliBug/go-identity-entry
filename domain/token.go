@@ -22,17 +22,6 @@ type TokenDetail interface {
 	GetUserID() string
 }
 
-/*
-// TokenConfig contain tokens config info
-type TokenConfig interface {
-	GetAccessTokenSecret() []byte
-	GetRefreshTokenSecret() []byte
-	GetIssuer() string
-	GetAccessExpirationSeconds() time.Duration
-	GetRefreshExpirationSeconds() time.Duration
-}
-*/
-
 // TokenUsecase represent the tokens' usercase contract
 type TokenUsecase interface {
 	CreateTokenUC(context.Context, string) (Token, error)

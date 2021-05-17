@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/alibug/go-identity/domain"
+	"github.com/alibug/go-identity-entry/domain"
 )
 
 type tokenUsecase struct {

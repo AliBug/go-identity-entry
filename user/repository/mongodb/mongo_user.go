@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
+	"github.com/alibug/go-identity-entry/domain"
+	"github.com/alibug/go-identity-entry/user/repository/body"
 	"github.com/alibug/go-identity-utils/status"
-	"github.com/alibug/go-identity/domain"
-	"github.com/alibug/go-identity/user/repository/body"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"

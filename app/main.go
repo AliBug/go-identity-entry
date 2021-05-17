@@ -9,14 +9,14 @@ import (
 	// "github.com/alibug/go-identity/helper/mongoconn"
 	// "github.com/alibug/go-identity/helper/redisconn"
 
+	_tokenRepo "github.com/alibug/go-identity-entry/token/repository/redisdb"
+	_tokenUseCase "github.com/alibug/go-identity-entry/token/usecase"
+	_userHttpDelivery "github.com/alibug/go-identity-entry/user/delivery/restgin"
+	_userRepo "github.com/alibug/go-identity-entry/user/repository/mongodb"
+	_userUseCase "github.com/alibug/go-identity-entry/user/usecase"
 	"github.com/alibug/go-identity-utils/config"
 	"github.com/alibug/go-identity-utils/mongoconn"
 	"github.com/alibug/go-identity-utils/redisconn"
-	_tokenRepo "github.com/alibug/go-identity/token/repository/redisdb"
-	_tokenUseCase "github.com/alibug/go-identity/token/usecase"
-	_userHttpDelivery "github.com/alibug/go-identity/user/delivery/restgin"
-	_userRepo "github.com/alibug/go-identity/user/repository/mongodb"
-	_userUseCase "github.com/alibug/go-identity/user/usecase"
 	"github.com/gin-gonic/gin"
 )
 

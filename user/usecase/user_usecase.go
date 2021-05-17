@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/alibug/go-identity-entry/domain"
 	"github.com/alibug/go-identity-utils/status"
-	"github.com/alibug/go-identity/domain"
 	"golang.org/x/crypto/bcrypt"
 )
 
