@@ -34,4 +34,5 @@ type TokenRepository interface {
 	CreateToken(context.Context, string) (Token, error)
 	DeleteToken(context.Context, Token) error
 	RefreshToken(context.Context, string) (Token, error)
+	CheckAccessToken(context.Context, string) (TokenDetail, error)
 }

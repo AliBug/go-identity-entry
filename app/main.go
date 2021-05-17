@@ -5,10 +5,6 @@ import (
 	"log"
 	"time"
 
-	// "github.com/alibug/go-identity/helper/configreader"
-	// "github.com/alibug/go-identity/helper/mongoconn"
-	// "github.com/alibug/go-identity/helper/redisconn"
-
 	_tokenRepo "github.com/alibug/go-identity-entry/token/repository/redisdb"
 	_tokenUseCase "github.com/alibug/go-identity-entry/token/usecase"
 	_userHttpDelivery "github.com/alibug/go-identity-entry/user/delivery/restgin"
