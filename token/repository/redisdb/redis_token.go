@@ -122,10 +122,10 @@ func (r *redisTokenRepository) DeleteToken(ctx context.Context, token domain.Tok
 	return status.ErrUnauthorized
 }
 
-func (r *redisTokenRepository) RefreshToken(ctx context.Context, token domain.Token) (domain.Token, error) {
-	if token.GetRefreshToken() != "" {
+func (r *redisTokenRepository) RefreshToken(ctx context.Context, refreshTokenStr string) (domain.Token, error) {
+	if refreshTokenStr != "" {
 		// 1、在 AccessToken 失效的情况下， 检查 refresh
-		refreshToken, err := r.checkRefreshToken(ctx, token.GetRefreshToken())
+		refreshToken, err := r.checkRefreshToken(ctx, refreshTokenStr)
 		if err != nil {
 			return nil, fmt.Errorf("%w:%v", status.ErrUnauthorized, err)
 		}

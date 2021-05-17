@@ -26,12 +26,12 @@ type TokenDetail interface {
 type TokenUsecase interface {
 	CreateTokenUC(context.Context, string) (Token, error)
 	DeleteTokenUC(context.Context, Token) error
-	RefreshTokenUC(context.Context, Token) (Token, error)
+	RefreshTokenUC(context.Context, string) (Token, error)
 }
 
 // TokenRepository represent the token' repository cantract
 type TokenRepository interface {
 	CreateToken(context.Context, string) (Token, error)
 	DeleteToken(context.Context, Token) error
-	RefreshToken(context.Context, Token) (Token, error)
+	RefreshToken(context.Context, string) (Token, error)
 }

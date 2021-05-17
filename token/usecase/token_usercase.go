@@ -44,11 +44,11 @@ func (t *tokenUsecase) DeleteTokenUC(c context.Context, token domain.Token) (err
 	return
 }
 
-func (t *tokenUsecase) RefreshTokenUC(c context.Context, token domain.Token) (res domain.Token, err error) {
+func (t *tokenUsecase) RefreshTokenUC(c context.Context, refreshTokenStr string) (res domain.Token, err error) {
 	ctx, cancel := context.WithTimeout(c, t.contextTimeout)
 	defer cancel()
 
-	res, err = t.tokenRepo.RefreshToken(ctx, token)
+	res, err = t.tokenRepo.RefreshToken(ctx, refreshTokenStr)
 	if err != nil {
 		return
 	}
