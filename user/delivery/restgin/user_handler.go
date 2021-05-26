@@ -1,7 +1,6 @@
 package restgin
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/alibug/go-identity-entry/domain"
@@ -135,7 +134,7 @@ func (u *UserHandler) setUserInfoToCookie(c *gin.Context, user domain.User) {
 
 func (u *UserHandler) clearUserInfoInCookie(c *gin.Context) {
 	c.SetCookie("displayname", "", 0, "/", u.cookieConfig.GetDomain(), u.cookieConfig.GetSecure(), false)
-	log.Println("clear user info")
+	c.SetCookie("userID", "", 0, "/", u.cookieConfig.GetDomain(), u.cookieConfig.GetSecure(), u.cookieConfig.GetHTTPOnly())
 }
 
 func (u *UserHandler) clearAccessTokenInCookie(c *gin.Context) {

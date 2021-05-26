@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -18,13 +19,13 @@ import (
 
 func main() {
 
-	timeoutDuration := 100 * time.Second
+	duration := config.ReadCustomIntConfig("mongo.duration", false)
+	timeDuration := time.Duration(duration) * time.Second
 
 	mongourl := config.ReadMongoConfig("mongo")
 
-	// mongourl := fmt.Sprintf(mongoURLTemplate, mongoUser, mongoPass, mongoHost, mongoDbName)
 	// 3、初始化 MongoDB 数据读取器
-	conn, err := mongoconn.NewConn(mongourl, timeoutDuration)
+	conn, err := mongoconn.NewConn(mongourl, timeDuration)
 	if err != nil {
 		log.Fatalf("创建数据库连接失败: %v", err)
 	}
@@ -41,8 +42,9 @@ func main() {
 		log.Fatal("连接MongoDB数据库失败")
 	}
 
-	redisURL := config.ReadRedisConfig("redis")
-	redisConn, err := redisconn.NewConn(redisURL)
+	// redisURL := config.ReadRedisConfig("redis")
+	// redisConn, err := redisconn.NewConn(redisURL)
+	redisConn := redisconn.NewConnFromConfig("redis")
 	if err != nil {
 		log.Fatalf("创建Redis数据库连接失败:%v", err)
 	}
@@ -55,17 +57,19 @@ func main() {
 	// 4、配置指定的 Collection
 	usersColl := conn.GetColl("users")
 	userRepo := _userRepo.NewMongoUserRepository(usersColl)
-	userUsercase := _userUseCase.NewUserUsecase(userRepo, timeoutDuration)
+	userUsercase := _userUseCase.NewUserUsecase(userRepo, timeDuration)
 
 	// 5、配置 TokenUserCase
 	tokenConfig := config.ReadTokenConfig("token", "maxage")
 	tokenRepo := _tokenRepo.NewRedisTokenRepository(redisConn, tokenConfig)
-	tokenUsercase := _tokenUseCase.NewTokenUsecase(tokenRepo, timeoutDuration)
+	tokenUsercase := _tokenUseCase.NewTokenUsecase(tokenRepo, timeDuration)
 
 	route := gin.Default()
 
 	cookieConfig := config.ReadCookieConfig("cookie", "maxage")
 	_userHttpDelivery.NewUserHandler(route, userUsercase, tokenUsercase, cookieConfig)
 
-	route.Run()
+	port := config.ReadCustomStringConfig("rest.port")
+
+	route.Run(fmt.Sprintf(":%s", port))
 }
