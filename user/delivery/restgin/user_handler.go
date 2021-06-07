@@ -1,6 +1,7 @@
 package restgin
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/alibug/go-identity-entry/domain"
@@ -47,8 +48,9 @@ func (u *UserHandler) Logout(c *gin.Context) {
 	// 2、Delete token
 	err := u.TokenUsecase.DeleteTokenUC(c, token)
 	if err != nil {
-		c.JSON(status.GetStatusCode(err), status.ResponseError{Message: err.Error()})
-		return
+		// c.JSON(status.GetStatusCode(err), status.ResponseError{Message: err.Error()})
+		// return
+		log.Printf("登出错误: %v", err)
 	}
 
 	// 3、正确删除 token 后， 清理 cookie
