@@ -3,7 +3,7 @@ module github.com/alibug/go-identity-entry
 go 1.16
 
 require (
-	github.com/alibug/go-identity-utils v0.1.11
+	github.com/alibug/go-identity-utils v0.1.12
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.7.1
 	github.com/go-redis/redis/v8 v8.8.2
