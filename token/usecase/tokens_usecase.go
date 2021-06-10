@@ -12,20 +12,22 @@ import (
 	"github.com/google/uuid"
 )
 
-type tokensUsecase struct {
+// TokensUsecase - 用于操作 token
+type TokensUsecase struct {
 	tokensRepo  domain.TokensRepository
 	tokenConfig config.TokenConfig
 }
 
 // NewTokensUsecase will create new an tokenUsecase object representation of domain.TokenUsecase interface
-func NewTokensUsecase(repo domain.TokensRepository, tc config.TokenConfig) domain.TokensUseCase {
-	return &tokensUsecase{
+func NewTokensUsecase(repo domain.TokensRepository, tc config.TokenConfig) *TokensUsecase {
+	return &TokensUsecase{
 		tokensRepo:  repo,
 		tokenConfig: tc,
 	}
 }
 
-func (t *tokensUsecase) CheckTokensAndLogout(ctx context.Context, tokens domain.Tokens) error {
+// CheckTokensAndLogout - 用于检查 AccessToken 与 RefreshToken 并在存储中删除
+func (t *TokensUsecase) CheckTokensAndLogout(ctx context.Context, tokens domain.Tokens) error {
 	// 1、CheckTokens
 	if tokens.GetAccessToken() != "" {
 		// 1.1、检查 AccessToken
@@ -35,7 +37,7 @@ func (t *tokensUsecase) CheckTokensAndLogout(ctx context.Context, tokens domain.
 		}
 		// 1.3、删除 atd
 		if atdExist {
-			t.DeleteTokenID(ctx, atd.GetTokenID())
+			t.deleteTokenID(ctx, atd.GetTokenID())
 		}
 	}
 
@@ -47,18 +49,19 @@ func (t *tokensUsecase) CheckTokensAndLogout(ctx context.Context, tokens domain.
 		}
 		// 1.4、删除 rtd
 		if rtdExist {
-			t.DeleteTokenID(ctx, rtd.GetTokenID())
+			t.deleteTokenID(ctx, rtd.GetTokenID())
 		}
 	}
 	return nil
 }
 
-// DeleteToken - 删除指定 的 Token
-func (t *tokensUsecase) DeleteTokenID(ctx context.Context, tokenID string) error {
+// deleteTokenID - 删除指定 的 Token
+func (t *TokensUsecase) deleteTokenID(ctx context.Context, tokenID string) error {
 	return t.tokensRepo.DeleteTokenID(ctx, tokenID)
 }
 
-func (t *tokensUsecase) CreateTokens(ctx context.Context, userID string) (domain.Tokens, error) {
+// CreateTokens - 同时创建 AccessToken 与 RefreshToken
+func (t *TokensUsecase) CreateTokens(ctx context.Context, userID string) (domain.Tokens, error) {
 	now := time.Now()
 	at, err := t.CreateAccessToken(ctx, userID, now)
 	if err != nil {
@@ -71,7 +74,8 @@ func (t *tokensUsecase) CreateTokens(ctx context.Context, userID string) (domain
 	return &TokensBody{AccessToken: at, RefreshToken: rt}, nil
 }
 
-func (t *tokensUsecase) CreateAccessToken(ctx context.Context, userID string, now time.Time) (string, error) {
+// CreateAccessToken - 创建 AccessToken
+func (t *TokensUsecase) CreateAccessToken(ctx context.Context, userID string, now time.Time) (string, error) {
 	atUUID := fmt.Sprintf("%s%s%s", uuid.NewString(), "++", userID)
 	atParams := NewJwtParams(
 		now,
@@ -81,10 +85,11 @@ func (t *tokensUsecase) CreateAccessToken(ctx context.Context, userID string, no
 		atUUID,
 		userID,
 	)
-	return t.CreateToken(ctx, atParams)
+	return t.createToken(ctx, atParams)
 }
 
-func (t *tokensUsecase) CreateRefreshToken(ctx context.Context, userID string, now time.Time) (string, error) {
+// CreateRefreshToken - 创建 RefreshToken
+func (t *TokensUsecase) CreateRefreshToken(ctx context.Context, userID string, now time.Time) (string, error) {
 	rtUUID := fmt.Sprintf("%s%s%s", uuid.NewString(), "++", userID)
 	rtParams := NewJwtParams(
 		now,
@@ -94,11 +99,11 @@ func (t *tokensUsecase) CreateRefreshToken(ctx context.Context, userID string, n
 		rtUUID,
 		userID,
 	)
-	return t.CreateToken(ctx, rtParams)
+	return t.createToken(ctx, rtParams)
 }
 
 // CreateToken - 实现创建 Token
-func (t *tokensUsecase) CreateToken(ctx context.Context, params domain.JwtParams) (string, error) {
+func (t *TokensUsecase) createToken(ctx context.Context, params domain.JwtParams) (string, error) {
 	// tokenExpires := params.GetIssueTime().Add(time.Second * params.GetExpiration())
 	tokenExpires := params.GetIssueTime().Add(params.GetExpirationSeconds())
 	atClaims := jwt.MapClaims{}
@@ -121,16 +126,18 @@ func (t *tokensUsecase) CreateToken(ctx context.Context, params domain.JwtParams
 	return atStr, nil
 }
 
-func (t *tokensUsecase) CheckAccessToken(ctx context.Context, tokenStr string) (domain.TokenDetail, bool, error) {
-	return t.CheckToken(ctx, tokenStr, t.tokenConfig.GetAccessTokenSecret())
+// CheckAccessToken - 检查 AccessToken 是否正确
+func (t *TokensUsecase) CheckAccessToken(ctx context.Context, tokenStr string) (domain.TokenDetail, bool, error) {
+	return t.checkToken(ctx, tokenStr, t.tokenConfig.GetAccessTokenSecret())
 }
 
-func (t *tokensUsecase) CheckRefreshToken(ctx context.Context, tokenStr string) (domain.TokenDetail, bool, error) {
-	return t.CheckToken(ctx, tokenStr, t.tokenConfig.GetRefreshTokenSecret())
+// CheckRefreshToken - 检查 RefreshToken 是否正确
+func (t *TokensUsecase) CheckRefreshToken(ctx context.Context, tokenStr string) (domain.TokenDetail, bool, error) {
+	return t.checkToken(ctx, tokenStr, t.tokenConfig.GetRefreshTokenSecret())
 }
 
-// CheckToken - 返回值 tokenDetail, 是否存在于数据库, 是否出错
-func (t *tokensUsecase) CheckToken(ctx context.Context, tokenStr string, secret []byte) (domain.TokenDetail, bool, error) {
+// checkToken - 返回值 tokenDetail, 是否存在于数据库, 是否出错
+func (t *TokensUsecase) checkToken(ctx context.Context, tokenStr string, secret []byte) (domain.TokenDetail, bool, error) {
 	td, err := parseJWTToken(tokenStr, secret)
 	if err != nil {
 		return nil, false, err
