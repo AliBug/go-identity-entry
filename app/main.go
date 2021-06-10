@@ -62,12 +62,12 @@ func main() {
 	// 5、配置 TokenUserCase
 	tokenConfig := config.ReadTokenConfig("token", "maxage")
 	tokenRepo := _tokenRepo.NewRedisTokensRepository(redisConn, tokenConfig)
-	tokenUsercase := _tokenUseCase.NewTokensUsecase(tokenRepo)
+	tokenUsercase := _tokenUseCase.NewTokensUsecase(tokenRepo, tokenConfig)
 
 	route := gin.Default()
 
 	cookieConfig := config.ReadCookieConfig("cookie", "maxage")
-	_userHttpDelivery.NewUsersHandler(route, userUsercase, tokenUsercase, tokenConfig, cookieConfig)
+	_userHttpDelivery.NewUsersHandler(route, userUsercase, tokenUsercase, cookieConfig)
 
 	port := config.ReadCustomStringConfig("rest.port")
 

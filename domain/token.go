@@ -19,24 +19,28 @@ type Tokens interface {
 
 // TokensUseCase - 处理 Tokens
 type TokensUseCase interface {
-	// CreateToken - 创建 token
-	CreateToken(ctx context.Context, params JwtParams) (string, error)
+	// CreateTokens - 创建 AccessToken 和 RefreshToken
+	CreateTokens(ctx context.Context, userID string) (Tokens, error)
 
-	// CheckToken - 用于检查 token 合法性
-	CheckToken(c context.Context, tokenStr string, secret []byte) (TokenDetail, error)
+	// CheckTokensAndLogout - 检查 Tokens
+	CheckTokensAndLogout(ctx context.Context, tokens Tokens) error
 
+	// CheckAccessToken - 用于检查 AccessToken 合法性
+	// CheckAccessToken(ctx context.Context, tokenStr string) (TokenDetail, bool, error)
+	// CheckRefreshToken - 用于检查 RefreshToken 合法性
+	// CheckRefreshToken(ctx context.Context, tokenStr string) (TokenDetail, bool, error)
 	// DeleteToken - 删除指定 的 Token
-	DeleteToken(c context.Context, tokenID string) error
+	// DeleteTokenID(c context.Context, tokenID string) error
 }
 
 // TokensRepository - 持久化处理 Tokens
 type TokensRepository interface {
 	// CreateToken - 创建 指定 TokenDetail
-	CreateToken(ctx context.Context, token TokenDetail, expiration time.Duration) error
+	CreateTokenID(ctx context.Context, token TokenDetail, expiration time.Duration) error
 	// CheckAccessToken - 检查 某个 TokenDetail 是否在数据库中持久化保存
-	CheckToken(ctx context.Context, token TokenDetail) (bool, error)
+	CheckTokenID(ctx context.Context, token TokenDetail) (bool, error)
 	// DeleteToken - 删除指定的 Token
-	DeleteToken(ctx context.Context, tokenID string) error
+	DeleteTokenID(ctx context.Context, tokenID string) error
 }
 
 // JwtParams - 创建 JWT 要用的参数

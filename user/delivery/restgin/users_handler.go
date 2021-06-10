@@ -1,35 +1,28 @@
 package restgin
 
 import (
-	"fmt"
-	"log"
 	"net/http"
-	"time"
 
 	"github.com/alibug/go-identity-entry/domain"
 	tokenBody "github.com/alibug/go-identity-entry/token/repository/body"
-	tokensUC "github.com/alibug/go-identity-entry/token/usecase"
 	userBody "github.com/alibug/go-identity-entry/user/repository/body"
 	"github.com/alibug/go-identity-utils/config"
 	"github.com/alibug/go-identity-utils/status"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 // UsersHandler  represent the httphandler for user
 type UsersHandler struct {
 	userUsecase   domain.UserUsecase
 	tokensUsecase domain.TokensUseCase
-	tokenConfig   config.TokenConfig
 	cookieConfig  config.CookieConfig
 }
 
 // NewUsersHandler represent the httphandler for user
-func NewUsersHandler(route *gin.Engine, uuc domain.UserUsecase, tuc domain.TokensUseCase, tc config.TokenConfig, cc config.CookieConfig) {
+func NewUsersHandler(route *gin.Engine, uuc domain.UserUsecase, tuc domain.TokensUseCase, cc config.CookieConfig) {
 	handler := &UsersHandler{
 		userUsecase:   uuc,
 		tokensUsecase: tuc,
-		tokenConfig:   tc,
 		cookieConfig:  cc,
 	}
 
@@ -48,21 +41,15 @@ func (u *UsersHandler) Logout(c *gin.Context) {
 		return
 	}
 
-	// 2、Delete access token
+	// 3、Delete access token
 	ctx := c.Request.Context()
-	u.tokensUsecase.DeleteToken(ctx, tokens.GetAccessToken())
-	u.tokensUsecase.DeleteToken(ctx, tokens.GetRefreshToken())
+	err := u.tokensUsecase.CheckTokensAndLogout(ctx, tokens)
+	if err != nil {
+		c.JSON(status.GetStatusCode(err), status.ResponseError{Message: err.Error()})
+		return
+	}
 
-	/*
-		err := u.tokensUsecase.DeleteTokenUC(c, token)
-		if err != nil {
-			// c.JSON(status.GetStatusCode(err), status.ResponseError{Message: err.Error()})
-			// return
-			log.Printf("登出错误: %v", err)
-		}
-	*/
-
-	// 3、正确删除 token 后， 清理 cookie
+	// 4、正确删除 token 后， 清理 cookie
 	u.clearAccessTokenInCookie(c)
 	u.clearUserInfoInCookie(c)
 	c.JSON(http.StatusOK, gin.H{"logout": true})
@@ -85,41 +72,15 @@ func (u *UsersHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// 4.1 、创建 Access Token
-	now := time.Now()
-	atUUID := uuid.NewString()
-	atParams := tokensUC.NewJwtParams(
-		now,
-		u.tokenConfig.GetAccessExpirationSeconds(),
-		u.tokenConfig.GetAccessTokenSecret(),
-		u.tokenConfig.GetIssuer(),
-		atUUID,
-		user.GetUserID(),
-	)
-	atStr, err := u.tokensUsecase.CreateToken(ctx, atParams)
-	if err != nil {
-		c.JSON(status.GetStatusCode(err), status.ResponseError{Message: err.Error()})
-		return
-	}
-
-	// 4.2 创建 Refresh Token
-	rtUUID := fmt.Sprintf("%s%s%s", atUUID, "++", user.GetUserID())
-	rtParams := tokensUC.NewJwtParams(
-		now,
-		u.tokenConfig.GetRefreshExpirationSeconds(),
-		u.tokenConfig.GetRefreshTokenSecret(),
-		u.tokenConfig.GetIssuer(),
-		rtUUID,
-		user.GetUserID(),
-	)
-	rtStr, err := u.tokensUsecase.CreateToken(ctx, rtParams)
+	// 4.1 、创建 Tokens
+	tokens, err := u.tokensUsecase.CreateTokens(ctx, user.GetUserID())
 	if err != nil {
 		c.JSON(status.GetStatusCode(err), status.ResponseError{Message: err.Error()})
 		return
 	}
 
 	// 5、写入 cookie
-	u.setTokenToCookie(c, atStr, rtStr)
+	u.setTokenToCookie(c, tokens)
 	u.setUserInfoToCookie(c, user)
 
 	// 6、⚠️ 此处是临时性的 设置 返回结果
@@ -159,9 +120,9 @@ func (u *UsersHandler) RegisterUser(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"ok": true})
 }
 
-func (u *UsersHandler) setTokenToCookie(c *gin.Context, accessToken string, refreshToken string) {
-	c.SetCookie(u.cookieConfig.GetAccessTokenField(), accessToken, u.cookieConfig.GetAccessTokenMaxAge(), "/", u.cookieConfig.GetDomain(), u.cookieConfig.GetSecure(), u.cookieConfig.GetHTTPOnly())
-	c.SetCookie(u.cookieConfig.GetRefreshTokenField(), refreshToken, u.cookieConfig.GetRefreshTokenMaxAge(), "/", u.cookieConfig.GetDomain(), u.cookieConfig.GetSecure(), u.cookieConfig.GetHTTPOnly())
+func (u *UsersHandler) setTokenToCookie(c *gin.Context, tokens domain.Tokens) {
+	c.SetCookie(u.cookieConfig.GetAccessTokenField(), tokens.GetAccessToken(), u.cookieConfig.GetAccessTokenMaxAge(), "/", u.cookieConfig.GetDomain(), u.cookieConfig.GetSecure(), u.cookieConfig.GetHTTPOnly())
+	c.SetCookie(u.cookieConfig.GetRefreshTokenField(), tokens.GetRefreshToken(), u.cookieConfig.GetRefreshTokenMaxAge(), "/", u.cookieConfig.GetDomain(), u.cookieConfig.GetSecure(), u.cookieConfig.GetHTTPOnly())
 }
 
 func (u *UsersHandler) setUserInfoToCookie(c *gin.Context, user domain.User) {
@@ -190,7 +151,6 @@ func (u *UsersHandler) getTokenFromCookie(c *gin.Context) domain.Tokens {
 		refreshToken = ""
 	}
 	if accessToken == "" && refreshToken == "" {
-		log.Println("请求 cookie")
 		return nil
 	}
 	return &tokenBody.TokenBody{AccessToken: accessToken, RefreshToken: refreshToken}
@@ -203,7 +163,6 @@ func (u *UsersHandler) mustNotLoginInterceptor() gin.HandlerFunc {
 			c.JSON(status.GetStatusCode(status.ErrForbidden), status.ResponseError{Message: "You have logged in"})
 			c.Abort()
 		}
-		log.Println("通过？")
 		c.Next()
 	}
 }
